@@ -1,0 +1,51 @@
+[[9 0 0 0 0 0 1 0 0 0]
+ [6 3 0 1 0 0 0 0 0 0]
+ [7 2 0 1 0 0 0 0 0 0]
+ [6 2 0 2 0 0 0 0 0 0]
+ [6 2 0 1 1 0 0 0 0 0]
+ [6 2 0 2 0 0 0 0 0 0]
+ [9 0 0 0 0 0 1 0 0 0]
+ [7 2 0 1 0 0 0 0 0 0]
+ [3 0 0 0 0 0 0 0 5 2]
+ [2 0 0 0 0 0 0 0 5 3]]
+
+
+
+
+from pymongo import MongoClient
+import pickle
+t = pickle.load(open('use_boards.p'))
+client = MongoClient("52.11.27.173", 27017)
+db = client['pinterest']
+boards = db.boards
+pins = db.fast_pins
+
+cnt = 0
+total = 0
+for b in t:
+	for p in t[b]:
+		total+=1
+		id = p.split('pin/')[1].replace('/', '')
+		print id
+		cursor = pins.find({'ID':id})
+		try:
+			a = cursor.next()
+		except:
+			cnt+=1
+			print total, cnt
+print total, cnt
+
+
+r = open('r.txt')
+rec = []
+for l in r:
+ rec.append(l.strip())
+
+r.close()
+r = open('list.txt')
+lst = []
+for l in r:
+ lst.append(l.split('\t')[0].split('pin/')[1].replace('/', ''))
+
+
+

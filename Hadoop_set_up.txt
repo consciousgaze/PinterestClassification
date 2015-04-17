@@ -1,0 +1,120 @@
+Hadoop set up:
+ssh set up:
+	sudo groupadd hadoop
+	sudo useradd -g hadoop hduser
+	sudo mkdir /home/hduser/.ssh
+	sudo vim /home/hduser/.ssh/authorized_keys
+	// paste id_rsa.pub from the master
+install hadoop:
+	// Master and all the slaves must have the same user and hadoop directory on same path.//
+	wget http://mirrors.sonic.net/apache/hadoop/common/stable/hadoop-2.6.0.tar.gz
+	tar xvzf hadoop-2.6.0.tar.gz
+	sudo mv hadoop-2.6.0 /usr/local/hadoop-2.6.0
+	sudo ln -s /usr/hadoop-2.6.0 /usr/hadoop
+	sudo chown -R hduser:hadoop /usr/local/hadoop
+	sudo chown -R hduser:hadoop /usr/local/hadoop-2.6.0
+
+	sudo vim /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+
+	export JAVA_HOME=/usr/lib/jvm/jre-openjdk
+	export HADOOP_PREFIX=/usr/local/hadoop
+
+	// edit hosts
+	sudo vim /etc/hosts
+		127.0.0.1   localhost localhost.localdomain [current-role]
+		127.0.1.1   [current-role]
+
+52.10.59.69  master
+52.11.30.66 slave1
+52.11.18.109 slave2
+52.11.27.171 slave3
+52.11.31.180 slave4
+52.11.30.84 slave5
+
+	// edit bashrc
+export HADOOP_HOME=/usr/local/hadoop/
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+export YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop
+
+	// edit yarn_env.sh
+export JAVA_HOME=/usr/lib/jvm/jre-openjdk
+
+	// edit configuration files on all machines
+	sudo vim $HADOOP_CONF_DIR/core-site.xml
+	  <property>
+	    <name>fs.default.name</name>
+	    <value>hdfs://master:9000</value>
+	  </property>
+	  <property>
+	    <name>hadoop.tmp.dir</name>
+	    <value>/home/hduser/yarn/hadoop-2.0.1-alpha/tmp</value>
+	  </property>
+
+	  sudo vim $HADOOP_CONF_DIR/hdfs-site.xml
+		   <property>
+		     <name>dfs.replication</name>
+		     <value>4</value>
+		   </property>
+		   <property>
+		     <name>dfs.permissions</name>
+		     <value>false</value>
+		   </property>
+
+	  sudo vim $HADOOP_CONF_DIR/mapred-site.xml
+	   <?xml version="1.0"?>
+		<configuration>
+		 <property>
+		   <name>mapreduce.framework.name</name>
+		   <value>yarn</value>
+		 </property>
+		</configuration>
+
+
+	  sudo vim $HADOOP_CONF_DIR/yarn-site.xml
+	      <property>
+		    <name>yarn.nodemanager.aux-services</name>
+		    <value>mapreduce_shuffle</value>
+		  </property>
+		  <property>
+		    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+		    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+		  </property>
+		  <property>
+		    <name>yarn.resourcemanager.resource-tracker.address</name>
+		    <value>master:8025</value>
+		  </property>
+		  <property>
+		    <name>yarn.resourcemanager.scheduler.address</name>
+		    <value>master:8030</value>
+		  </property>
+		  <property>
+		    <name>yarn.resourcemanager.address</name>
+		    <value>master:8040</value>
+		  </property>
+
+
+	// add slaves on master machine
+	sudo vim $HADOOP_CONF_DIR/slaves
+master
+slave1
+slave2
+slave3
+slave4
+slave5
+
+	// format name node
+	bin/hadoop namenode -format
+
+	// Start Hadoop Daemons
+	sbin/hadoop-daemon.sh start namenode
+	sbin/hadoop-daemons.sh start datanode
+	sbin/yarn-daemon.sh start resourcemanager
+	sbin/yarn-daemons.sh start nodemanager
+	sbin/mr-jobhistory-daemon.sh start historyserver
+
+	// check
+	jps

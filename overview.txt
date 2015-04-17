@@ -1,0 +1,101 @@
+https://zoodig.signin.aws.amazon.com/console
+binwang/dsllrocks
+HADOOP_CLASSPATH=s3://pinterest-crawling/lib/json.jar:s3://pinterest-crawling/lib/jsoup-1.8.1.jar
+ssh -Y -i ~/Dropbox/DSLL/PinterestCrawling.pem ec2-user@52.10.33.220
+hadoop jar crawler.jar dsll.pinterest_crawler.Crawler -libjars externLib/json.jar,externLib/jsoup-1.8.1.jar /home/hadoop/pinterest_data.csv /home/hadoop/output
+install nokogiri: sudo yum -y install gcc mysql-devel ruby-devel rubygems
+				  sudo yum install -y libxml2 libxml2-devel
+				  sudo yum install -y patch
+				  sudo gem install nokogiri
+
+install mongodb: http://docs.mongodb.org/ecosystem/platforms/amazon-ec2/#deploy-mongodb-ec2
+
+--aws-access-key AKIAICYSGZ5KW3MSJ5OQ 
+--aws-secret-key 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
+
+ec2-run-instances ami-05355a6c -t m1.large -g pinterest-crawling -k ~/Dropbox/DSLL/PinterestCrawling.pem -b "/dev/xvdf=:200:false:io1:1000" -b "/dev/xvdg=:25:false:io1:250" -b "/dev/xvdh=:10:false:io1:100" --ebs-optimized true 
+--aws-access-key AKIAICYSGZ5KW3MSJ5OQ --aws-secret-key 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
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA1biPakY6qcTs2zfHgqFg8KyRKFEhR7Y13s4EtSSL5y15BcVAE0Cp2a2VK6bozeui46EIkZqaYrhxjT6R+ApsOSE6sh2Ah1pwI/YO2vAXjfZpwUW0B6Tlr1r3jA0CtG7hxWauRwmAza05zOfYYfakozC/tFFoMZwhmsYmJJVpV8f8rx22jyFxeGr0T0HjGvMkI7ZN3S6EFHBpLktD5TJTEmj89miyf5YV/CZTwtg2obKBT2oSzHvL0rKK0lrMBV9MGWZjSH7htev64iEPVSZK2I4YZgsooyCSbcWr+EGOPkBXLKELr4suWdam+M38czN74d9fhsaZtBdDO572K0LN hduser@ip-172-30-3-244
+
+
+
+hadoop:
+	master 52.10.59.69 done
+	slave1 52.11.30.66
+	slave2 52.11.18.109
+	slave3 52.11.27.171
+	slave4 52.11.31.180
+	slave5 52.11.30.84
+
+
+
+
+
+
+EC2_HOME=ec2-api-tools-1.7.3.0
+
+
+Architecture:
+	1. master holds the database and distribute crawling tasks to slaves
+	2. slaves stores images per pin to s3 buckets and returns the database entires to master
+
+Operating procedure:
+	1. scrap the entries from give file, populate boards and pins table
+	2. skip crawled pins/boards
+	3. after finishes the file, go through the following loop until tasks are empty:
+		tasks.execute()
+		loop through pinsTable:
+			if pins.boards not in boradsTable:
+				tasks.append("scrap pins.boards")
+		tasks.execute()
+		loop through boardsTable:
+			for pin in boards.pins:
+				if pin not in pinsTable:
+					tasks.append("scrap pin")
+
+iptables -I INPUT -p tcp --dport 443 --syn -j ACCEPT
+
+master ip: 
+	52.10.33.220
+slave ip:
+	52.10.56.1
+
+
+
+Pinterest Database
+pins: 
+	source
+	related_pins
+	name
+	ID
+	image
+	board
+	credit
+	comments
+
+boards: 
+	pins
+	description
+	name
+	owner
+	owner_id
+	ID
+	src
+
+rm -rf imagenet_train_leveldb
+rm -rf imagenet_val_leveldb
+
+f = open('test.txt', 'w')
+i = open('tet.txt')
+for l in i:
+	l = l.replace('~/image/', '')
+	f.write(l)
+
+f.close()
+i.close()
+
+
+Public IP	52.11.130.29
+User name	Administrator
+Password	&XTv2;-gU*D
